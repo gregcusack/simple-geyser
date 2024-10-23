@@ -7,7 +7,7 @@ use {
         slot_history::Slot,
         pubkey::Pubkey,
     },
-    solana_gossip::crds_value::CrdsValue,
+    solana_gossip::crds::VersionedCrdsValue,
     
 };
 
@@ -52,7 +52,7 @@ impl GeyserPlugin for SimplePlugin {
     }
 
     fn account_data_notifications_enabled(&self) -> bool {
-        true // process account changes
+        false // process account changes
     }
 
     fn transaction_notifications_enabled(&self) -> bool {
@@ -75,9 +75,13 @@ impl GeyserPlugin for SimplePlugin {
         Ok(())
     }
 
-    fn insert_crds(&self, crds_value: CrdsValue) -> PluginResult<()> {
-        println!("greg: crds value: {}", crds_value.pubkey());
+    fn insert_crds_value(&self, value: VersionedCrdsValue) -> PluginResult<()> {
+        println!("greg: rx origin pk: {}", value.value.pubkey());
         Ok(())
+    }
+
+    fn gossip_messages_notifications_enabled(&self) -> bool {
+        true
     }
 
 }

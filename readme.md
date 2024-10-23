@@ -2,7 +2,7 @@
 - src/plugin.rs: main plugin code
 - to run: `cargo build && solana-test-validator -r --geyser-plugin-config config.json`
 - note: make sure `solana-test-validator --version` matches the `Cargo.toml` version
-  - sh -c "$(curl -sSfL https://release.solana.com/<b>v1.14.1</b>/install)" -- to install a specific version
+  - sh -c "$(curl -sSfL https://release.solana.com/<b>v2.0.14</b>/install)" -- to install a specific version
 
 ...
 
@@ -12,8 +12,8 @@ what you should see:
 ⠄ Initializing...
 Identity: CRCJ7zzd5SSmA8AJ9gbtv4QrYZ2zw4YKWa1MCDw1NTf2
 Genesis Hash: 9VRik4BdeNEoZdvAabsinfDjfXVLj2rCpCcLe6grVdem
-Version: 1.10.34
-Shred Version: 12622
+Version: 2.0.14
+Shred Version: 32996
 Gossip Address: 127.0.0.1:1024
 TPU Address: 127.0.0.1:1027
 JSON RPC URL: http://127.0.0.1:8899

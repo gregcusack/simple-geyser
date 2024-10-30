@@ -46,7 +46,7 @@ impl SimplePlugin {
             // let bandwidth = bytes as f64 / elapsed.as_secs_f64();
 
             info!(
-                "greg: event rate: {:.2} events/s",
+                "greg: Event rate: {:.2} events/s",
                 rate
             );
 

@@ -1,8 +1,14 @@
 use { 
     agave_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, ReplicaAccountInfoVersions, Result as PluginResult,
+        ReplicaTransactionInfoVersions,
     },
-    solana_program::pubkey::Pubkey
+    solana_program::{
+        slot_history::Slot,
+        pubkey::Pubkey,
+    },
+    solana_gossip::crds::VersionedCrdsValue,
+    
 };
 
 #[derive(Debug, Default)]
@@ -23,7 +29,7 @@ impl GeyserPlugin for SimplePlugin {
         &self,
         account: ReplicaAccountInfoVersions,
         slot: u64,
-        is_startup: bool,
+        _is_startup: bool,
     ) -> PluginResult<()> {
 
         let pubkey_bytes = match account {
@@ -46,11 +52,36 @@ impl GeyserPlugin for SimplePlugin {
     }
 
     fn account_data_notifications_enabled(&self) -> bool {
-        true // process account changes
+        false // process account changes
     }
 
     fn transaction_notifications_enabled(&self) -> bool {
         false // dont process new txs
+    }
+
+    fn notify_transaction(
+        &self,
+        transaction: ReplicaTransactionInfoVersions,
+        slot: Slot,
+    ) -> PluginResult<()> {
+        match transaction {
+            ReplicaTransactionInfoVersions::V0_0_1(transaction_info) => {
+                println!("transaction {:#?} at slot {}!", transaction_info, slot);
+            }
+            ReplicaTransactionInfoVersions::V0_0_2(transaction_info) => {
+                println!("transaction {:#?} at slot {}!", transaction_info, slot);
+            }
+        }
+        Ok(())
+    }
+
+    fn insert_crds_value(&self, value: VersionedCrdsValue) -> PluginResult<()> {
+        println!("greg: rx origin pk: {}", value.value.pubkey());
+        Ok(())
+    }
+
+    fn gossip_messages_notifications_enabled(&self) -> bool {
+        true
     }
 
 }

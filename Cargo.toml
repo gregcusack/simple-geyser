@@ -13,6 +13,7 @@ solana-program = { path = "/home/sol/solana/sdk/program" }
 solana-gossip = { path = "/home/sol/solana/gossip" }
 solana-logger = { path = "/home/sol/solana/logger" }
 solana-sdk = { path = "/home/sol/solana/sdk" }
+bincode = "1.3.3"
 
 [patch.crates-io]
 solana-program = { path = "/home/sol/solana/sdk/program" }

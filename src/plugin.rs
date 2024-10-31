@@ -1,15 +1,16 @@
 use { 
+    log::*,
     agave_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, ReplicaAccountInfoVersions, Result as PluginResult,
-        ReplicaTransactionInfoVersions,
+        ReplicaTransactionInfoVersions, ContactInfoVersions,
     },
     solana_program::{
         slot_history::Slot,
         pubkey::Pubkey,
-    },
-    solana_gossip::crds::VersionedCrdsValue,
-    
+    },    
 };
+
+pub const RUST_LOG_FILTER: &str = "info";
 
 #[derive(Debug, Default)]
 pub struct SimplePlugin {}
@@ -20,6 +21,7 @@ impl GeyserPlugin for SimplePlugin {
     }
 
     fn on_load(&mut self, _config_file: &str, _is_reload: bool) -> PluginResult<()> {
+        solana_logger::setup_with_default(RUST_LOG_FILTER); // Ensure logging is initialized
         Ok(())
     }
 
@@ -38,7 +40,7 @@ impl GeyserPlugin for SimplePlugin {
             ReplicaAccountInfoVersions::V0_0_3(account_info) => account_info.pubkey,
         };
 
-        println!(
+        error!(
             "account {:?} updated at slot {}!",
             Pubkey::try_from(pubkey_bytes).unwrap(),
             slot
@@ -66,17 +68,21 @@ impl GeyserPlugin for SimplePlugin {
     ) -> PluginResult<()> {
         match transaction {
             ReplicaTransactionInfoVersions::V0_0_1(transaction_info) => {
-                println!("transaction {:#?} at slot {}!", transaction_info, slot);
+                error!("transaction {:#?} at slot {}!", transaction_info, slot);
             }
             ReplicaTransactionInfoVersions::V0_0_2(transaction_info) => {
-                println!("transaction {:#?} at slot {}!", transaction_info, slot);
+                error!("transaction {:#?} at slot {}!", transaction_info, slot);
             }
         }
         Ok(())
     }
 
-    fn insert_crds_value(&self, value: VersionedCrdsValue) -> PluginResult<()> {
-        println!("greg: rx origin pk: {}", value.value.pubkey());
+    fn insert_crds_value(&self, ci: ContactInfoVersions) -> PluginResult<()> {
+        match ci {
+            ContactInfoVersions::V0_0_1(ci) => {
+                error!("ContactInfoVersions::V0_0_1 pk: {}, wc: {}, sv: {}", Pubkey::from(ci.pubkey), ci.wallclock, ci.shred_version);
+            }
+        }
         Ok(())
     }
 

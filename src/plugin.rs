@@ -33,6 +33,8 @@ pub struct SimplePlugin {}
 
 impl SimplePlugin {
     fn init_shared_memory(&self) -> PluginResult<()> {
+        // calculate shared mem size. 
+        // 2 u64s for head and tail, and BUFFER_CAPACITY * ENTRY_SIZE for the buffer
         let shm_size = size_of::<u64>() * 2 + BUFFER_CAPACITY * ENTRY_SIZE;
 
         // Create or open the shared memory file
@@ -148,7 +150,7 @@ impl GeyserPlugin for SimplePlugin {
     fn insert_crds_value(&self, ci: ContactInfoVersions) -> PluginResult<()> {
 
         let ContactInfoVersions::V0_0_1(ffi_ci) = ci;
-        error!("ContactInfoVersions::V0_0_1 pk: {}, wc: {}, sv: {}", Pubkey::from(ffi_ci.pubkey), ffi_ci.wallclock, ffi_ci.shred_version);
+        error!("greg: ci -> pk: {}, wc: {}, sv: {}", Pubkey::from(ffi_ci.pubkey), ffi_ci.wallclock, ffi_ci.shred_version);
         
         // Ensure shared memory is initialized
         if unsafe { MMAP.is_none() } {
@@ -178,6 +180,7 @@ impl GeyserPlugin for SimplePlugin {
             // Handle overwriting old data if buffer is full
             if head.load(Ordering::SeqCst) - tail.load(Ordering::SeqCst) > BUFFER_CAPACITY as u64 {
                 // Buffer is full; advance tail
+                error!("greg: advance tail");
                 tail.fetch_add(1, Ordering::SeqCst);
             }
         }        

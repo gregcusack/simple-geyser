@@ -147,7 +147,7 @@ impl GeyserPlugin for SimplePlugin {
         Ok(())
     }
 
-    fn insert_crds_value(&self, ci: ContactInfoVersions) -> PluginResult<()> {
+    fn upsert_crds_value(&self, ci: ContactInfoVersions) -> PluginResult<()> {
 
         let ContactInfoVersions::V0_0_1(ffi_ci) = ci;
         error!("greg: ci -> pk: {}, wc: {}, sv: {}", Pubkey::from(ffi_ci.pubkey), ffi_ci.wallclock, ffi_ci.shred_version);

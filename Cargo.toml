@@ -7,10 +7,12 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-
+log = "0.4.22"
 agave-geyser-plugin-interface = { path = "/home/sol/solana/geyser-plugin-interface" }
 solana-program = { path = "/home/sol/solana/sdk/program" }
 solana-gossip = { path = "/home/sol/solana/gossip" }
+solana-logger = { path = "/home/sol/solana/logger" }
+solana-sdk = { path = "/home/sol/solana/sdk" }
 
 [patch.crates-io]
 solana-program = { path = "/home/sol/solana/sdk/program" }

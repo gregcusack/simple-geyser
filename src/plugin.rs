@@ -46,7 +46,7 @@ impl SimplePlugin {
             // let bandwidth = bytes as f64 / elapsed.as_secs_f64();
 
             info!(
-                "greg: Event rate: {:.2} events/s",
+                "greg: event rate: {:.2} events/s",
                 rate
             );
 
@@ -95,7 +95,7 @@ impl GeyserPlugin for SimplePlugin {
     }
 
     fn account_data_notifications_enabled(&self) -> bool {
-        true // process account changes
+        false // process account changes
     }
 
     fn transaction_notifications_enabled(&self) -> bool {

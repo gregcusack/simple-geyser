@@ -1,10 +1,13 @@
 use {
-    log::*,
     agave_geyser_plugin_interface::geyser_plugin_interface::{
-        GeyserPlugin, ReplicaAccountInfoVersions, Result as PluginResult,
-        ReplicaTransactionInfoVersions, FfiPubkey, GeyserPluginError,
-    },
-    solana_gossip::contact_info_ffi::{FfiSocketAddr, ContactInfoInterface, ffi_socket_addr_to_socket_addr},
+        FfiPubkey, GeyserPlugin, GeyserPluginError, ReplicaAccountInfoVersions, ReplicaTransactionInfoVersions, Result as PluginResult
+    }, 
+    log::*, 
+    solana_gossip::contact_info_ffi::{
+        ffi_socket_addr_to_socket_addr, 
+        FfiContactInfoInterface,
+        FfiProtocol,
+    }, 
     solana_program::slot_history::Slot, 
     solana_sdk::pubkey::Pubkey,
 };
@@ -77,28 +80,32 @@ impl GeyserPlugin for SimplePlugin {
     }
 
     fn notify_node_update(&self, interface: &FfiContactInfoInterface) -> PluginResult<()> {
-        let pubkey_ptr = unsafe { (interface.get_pubkey_fn)(interface.contact_info_ptr) };
-        let pubkey_bytes = unsafe { std::slice::from_raw_parts(pubkey_ptr, 32) };
-        let pk = Pubkey::try_from(pubkey_bytes).unwrap();
-        let wallclock = unsafe { (interface.get_wallclock_fn)(interface.contact_info_ptr) };
-        let shred_version = unsafe { (interface.get_shred_version_fn)(interface.contact_info_ptr) };
-        let mut ffi_gossip_socket = FfiSocketAddr::default();
+        let pk = interface.pubkey().map_err(|e| {
+            error!("greg: failed pubkey: {:?}", e);
+            GeyserPluginError::NodeUpdateError {
+                msg: e.to_string(),
+            }
+        })?;
+        let wallclock = interface.wallclock();
+        let shred_version = interface.shred_version();
 
-        let success = unsafe {
-            (interface.get_gossip_fn)(
-                interface.contact_info_ptr,
-                &mut ffi_gossip_socket as *mut FfiSocketAddr,
-            )
-        };
-        if !success {
-            error!("greg: failed gossip socket: {:?}", pk);
-            return Err(GeyserPluginError::Custom(Box::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                "greg: failed to get gossip socket",
-            ))));
-        }
-        let gossip = ffi_socket_addr_to_socket_addr(&ffi_gossip_socket);
-        info!("greg: pk: {}, wc: {}, sv: {}, gs: {}", pk, wallclock, shred_version, gossip);
+        let gossip = interface.gossip().map(|ffi_socket| {
+            ffi_socket_addr_to_socket_addr(&ffi_socket)
+        });
+
+        let rpc = interface.rpc().map(|ffi_socket| {
+            ffi_socket_addr_to_socket_addr(&ffi_socket)
+        });
+
+        let tpu_quic = interface.tpu(FfiProtocol::QUIC).map(|ffi_socket| {
+            ffi_socket_addr_to_socket_addr(&ffi_socket)
+        });
+
+        let tpu_udp = interface.tpu(FfiProtocol::UDP).map(|ffi_socket| {
+            ffi_socket_addr_to_socket_addr(&ffi_socket)
+        });
+
+        info!("greg: pk: {}, wc: {}, sv: {}, gs: {:?}, rs: {:?}, tsq: {:?}, tsu: {:?}", pk, wallclock, shred_version, gossip, rpc, tpu_quic, tpu_udp);
 
         Ok(())
     }

@@ -2,8 +2,9 @@ use {
     log::*,
     agave_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, ReplicaAccountInfoVersions, Result as PluginResult,
-        ReplicaTransactionInfoVersions, FfiNode, FfiPubkey,
+        ReplicaTransactionInfoVersions, FfiPubkey, GeyserPluginError,
     },
+    solana_gossip::contact_info_ffi::{FfiSocketAddr, ContactInfoInterface, ffi_socket_addr_to_socket_addr},
     solana_program::slot_history::Slot, 
     solana_sdk::pubkey::Pubkey,
 };
@@ -75,8 +76,30 @@ impl GeyserPlugin for SimplePlugin {
         Ok(())
     }
 
-    fn notify_node_update(&self, ffi_node: &FfiNode) -> PluginResult<()> {
-        info!("greg: ffi_node -> pk: {}, wc: {}, sv: {}", Pubkey::from(ffi_node.pubkey.pubkey), ffi_node.wallclock, ffi_node.shred_version);
+    fn notify_node_update(&self, interface: &FfiContactInfoInterface) -> PluginResult<()> {
+        let pubkey_ptr = unsafe { (interface.get_pubkey_fn)(interface.contact_info_ptr) };
+        let pubkey_bytes = unsafe { std::slice::from_raw_parts(pubkey_ptr, 32) };
+        let pk = Pubkey::try_from(pubkey_bytes).unwrap();
+        let wallclock = unsafe { (interface.get_wallclock_fn)(interface.contact_info_ptr) };
+        let shred_version = unsafe { (interface.get_shred_version_fn)(interface.contact_info_ptr) };
+        let mut ffi_gossip_socket = FfiSocketAddr::default();
+
+        let success = unsafe {
+            (interface.get_gossip_fn)(
+                interface.contact_info_ptr,
+                &mut ffi_gossip_socket as *mut FfiSocketAddr,
+            )
+        };
+        if !success {
+            error!("greg: failed gossip socket: {:?}", pk);
+            return Err(GeyserPluginError::Custom(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "greg: failed to get gossip socket",
+            ))));
+        }
+        let gossip = ffi_socket_addr_to_socket_addr(&ffi_gossip_socket);
+        info!("greg: pk: {}, wc: {}, sv: {}, gs: {}", pk, wallclock, shred_version, gossip);
+
         Ok(())
     }
 

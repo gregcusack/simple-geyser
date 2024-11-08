@@ -4,10 +4,10 @@
 #include <stdint.h>
 
 // Define function pointer types for the Geyser plugin interface
-typedef const char* (*NameFn)();
+typedef const char* (*NameFn)(void);
 typedef int32_t (*OnLoadFn)(const char* config_file, int is_reload);
-typedef void (*OnUnloadFn)();
-typedef int32_t (*NodeUpdateNotificationsEnabledFn)();
+typedef void (*OnUnloadFn)(void);
+typedef int32_t (*NodeUpdateNotificationsEnabledFn)(void);
 typedef int32_t (*NotifyNodeUpdateFn)(const void* interface);
 
 // Define the FfiGeyserPlugin struct with all necessary function pointers
@@ -20,7 +20,7 @@ struct FfiGeyserPlugin {
 };
 
 // Return the plugin's name
-const char* name() {
+const char* name(void) {
     return "simple_geyser_in_c";
 }
 
@@ -31,12 +31,12 @@ int32_t on_load(const char* config_file, int is_reload) {
 }
 
 // Unload the plugin
-void on_unload() {
+void on_unload(void) {
     printf("greg: Unloading plugin.\n");
 }
 
 // Enable node update notifications
-int node_update_notifications_enabled() {
+int node_update_notifications_enabled(void) {
     return 1; // Return non-zero to indicate enabled
 }
 
@@ -44,20 +44,13 @@ int node_update_notifications_enabled() {
 int notify_node_update(const void* interface) {
     // Implement logic to handle the node update
     printf("greg: Node update notified.\n");
+    const struct FfiContactInfoInterface* info = (const struct FfiContactInfoInterface*)interface;
+
     return 0; // Return 0 for success
 }
 
-// // Export the plugin as an `FfiGeyserPlugin` struct
-// __attribute__((visibility("default"))) struct FfiGeyserPlugin plugin = {
-//     .name = name,
-//     .on_load = on_load,
-//     .on_unload = on_unload,
-//     .node_update_notifications_enabled = node_update_notifications_enabled,
-//     .notify_node_update = notify_node_update,
-// };
-
 // Implement _create_plugin function
-__attribute__((visibility("default"))) struct FfiGeyserPlugin* _create_plugin() {
+__attribute__((visibility("default"))) struct FfiGeyserPlugin* _create_geyser_plugin_c(void) {
     struct FfiGeyserPlugin* plugin = (struct FfiGeyserPlugin*)malloc(sizeof(struct FfiGeyserPlugin));
     plugin->name = name;
     plugin->on_load = on_load;

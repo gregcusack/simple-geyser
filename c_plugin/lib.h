@@ -20,9 +20,13 @@ struct FfiVersion {
     uint16_t client;
 };
 
-struct FfiSocketAddr {
-    uint8_t is_v4;    // 1 if IPv4, 0 if IPv6
+struct FfiIpAddr {
+    uint8_t is_v4;     // 1 if IPv4, 0 if IPv6
     uint8_t addr[16]; // IP address bytes
+};
+
+struct FfiSocketAddr {
+    struct FfiIpAddr ip;
     uint16_t port;
 };
 
@@ -91,11 +95,11 @@ char* format_socket_addr(const struct FfiSocketAddr *addr) {
         return NULL; // Memory allocation failed
     }
 
-    if (addr->is_v4) {
-        inet_ntop(AF_INET, addr->addr, ip_str, sizeof(ip_str));
+    if (addr->ip.is_v4) {
+        inet_ntop(AF_INET, addr->ip.addr, ip_str, sizeof(ip_str));
         snprintf(result, INET6_ADDRSTRLEN + 8, "%s:%d", ip_str, addr->port);
     } else {
-        inet_ntop(AF_INET6, addr->addr, ip_str, sizeof(ip_str));
+        inet_ntop(AF_INET6, addr->ip.addr, ip_str, sizeof(ip_str));
         snprintf(result, INET6_ADDRSTRLEN + 8, "[%s]:%d", ip_str, addr->port);
     }
 

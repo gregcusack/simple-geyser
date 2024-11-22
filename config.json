@@ -1,3 +1,3 @@
 {
-    "libpath": "/home/sol/simple-geyser/target/release/libgeyser.so"
+    "libpath": "/home/sol/simple-geyser/c_plugin/libsimple_geyser_plugin.so"
 }

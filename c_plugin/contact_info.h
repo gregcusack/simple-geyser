@@ -28,25 +28,11 @@ struct ContactInfo_C {
     char *tvu_quic_addr;
 };
 
-struct ContactInfo_C* get_contact_info(const struct FfiContactInfoInterface* info) {
-    if (info == NULL 
-        || info->get_pubkey_fn == NULL 
-        || info->get_wallclock_fn == NULL
-        || info->get_shred_version_fn == NULL
-        || info->get_version_fn == NULL
-        || info->get_gossip_fn == NULL
-        || info->get_rpc_fn == NULL
-        || info->get_rpc_pubsub_fn == NULL
-        || info->get_serve_repair_fn == NULL
-        || info->get_tpu_fn == NULL
-        || info->get_tpu_forwards_fn == NULL
-        || info->get_tpu_vote_fn == NULL
-        || info->get_tvu_fn == NULL
-    ) {
-        fprintf(stderr, "Invalid interface or function pointers are NULL\n");
+struct ContactInfo_C* get_contact_info(const FfiContactInfoInterface* interface) {
+    if (!interface || !interface->contact_info_ptr || !interface->function_table) {
+        fprintf(stderr, "Invalid interface or function table\n");
         return NULL;
     }
-
     //initialize ContactInfo_C
     struct ContactInfo_C* contact_info_c = (struct ContactInfo_C*)malloc(sizeof(struct ContactInfo_C));
     if (contact_info_c == NULL) {
@@ -55,7 +41,7 @@ struct ContactInfo_C* get_contact_info(const struct FfiContactInfoInterface* inf
     }
 
     // Get Pubkey
-    Key pubkey = info->get_pubkey_fn(info->contact_info_ptr);
+    Key pubkey = interface->function_table->get_pubkey_fn(interface->contact_info_ptr);
     if (pubkey == NULL) {
         fprintf(stderr, "pubkey is NULL\n");
         free(contact_info_c);
@@ -70,11 +56,12 @@ struct ContactInfo_C* get_contact_info(const struct FfiContactInfoInterface* inf
     }
 
     // Get wallclock and shred version
-    contact_info_c->wallclock = info->get_wallclock_fn(info->contact_info_ptr);
-    contact_info_c->shred_version = info->get_shred_version_fn(info->contact_info_ptr);
+    contact_info_c->wallclock = interface->function_table->get_wallclock_fn(interface->contact_info_ptr);
+    contact_info_c->shred_version = interface->function_table->get_shred_version_fn(interface->contact_info_ptr);
+
 
     // Get version
-    if (!info->get_version_fn(info->contact_info_ptr, &contact_info_c->version)) {
+    if (!interface->function_table->get_version_fn(interface->contact_info_ptr, &contact_info_c->version)) {
         fprintf(stderr, "Failed to get version information\n");
         free(contact_info_c);
         return NULL;
@@ -97,22 +84,33 @@ struct ContactInfo_C* get_contact_info(const struct FfiContactInfoInterface* inf
     struct FfiSocketAddr socket;
 
     // GET_ADDRESS helper macro
-    #define GET_ADDRESS(func, protocol, addr_field) \
-        if (info->func(info->contact_info_ptr, protocol, &socket)) { \
+    #define GET_ADDRESS(func_name, protocol, addr_field) \
+        if (interface->function_table->func_name(interface->contact_info_ptr, protocol, &socket)) { \
             contact_info_c->addr_field = format_socket_addr(&socket); \
+        } else { \
+            contact_info_c->addr_field = NULL; \
         }
 
-    if (info->get_gossip_fn(info->contact_info_ptr, &socket)) {
+    if (interface->function_table->get_gossip_fn(interface->contact_info_ptr, &socket)) {
         contact_info_c->gossip_addr = format_socket_addr(&socket);
+    } else {
+        contact_info_c->gossip_addr = NULL;
     }
 
-    if (info->get_rpc_fn(info->contact_info_ptr, &socket)) {
+    // Get RPC address
+    if (interface->function_table->get_rpc_fn(interface->contact_info_ptr, &socket)) {
         contact_info_c->rpc_addr = format_socket_addr(&socket);
+    } else {
+        contact_info_c->rpc_addr = NULL;
     }
 
-    if (info->get_rpc_pubsub_fn(info->contact_info_ptr, &socket)) {
+    // Get RPC PubSub address
+    if (interface->function_table->get_rpc_pubsub_fn(interface->contact_info_ptr, &socket)) {
         contact_info_c->rpc_pubsub_addr = format_socket_addr(&socket);
+    } else {
+        contact_info_c->rpc_pubsub_addr = NULL;
     }
+
 
     GET_ADDRESS(get_serve_repair_fn, UDP, serve_repair_addr)
 
@@ -134,8 +132,12 @@ struct ContactInfo_C* get_contact_info(const struct FfiContactInfoInterface* inf
 }
 
 void print_contact_info(const struct ContactInfo_C *contact_info_c) {
+    if (!contact_info_c) {
+        fprintf(stderr, "ContactInfo_C is NULL\n");
+        return;
+    }
     fprintf(stderr,
-        "plugin: pk: %s, wc: %" PRIu64 ", sv: %" PRIu64 ", gs: %s, rs: %s, rpas: %s, "
+        "greg: plugin: pk: %s, wc: %" PRIu64 ", sv: %" PRIu64 ", gs: %s, rs: %s, rpas: %s, "
         "srs: %s, tus: %s, tqs: %s, tfus: %s, tfqs: %s, tpu_vote_udp_s: %s, "
         "tpvqs: %s, tvu_udp_s: %s, tvu_quic_s: %s, version: v%u.%u.%u\n",
         contact_info_c->base58_pubkey, 

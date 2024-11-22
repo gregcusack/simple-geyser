@@ -30,7 +30,7 @@ int node_update_notifications_enabled(void) {
 }
 
 int notify_node_update(const void* interface) {
-    const struct FfiContactInfoInterface* info = (const struct FfiContactInfoInterface*)interface;
+    const FfiContactInfoInterface* info = (const FfiContactInfoInterface*)interface;
     struct ContactInfo_C* contact_info_c = get_contact_info(info);
     if (!contact_info_c) {
         return -1;

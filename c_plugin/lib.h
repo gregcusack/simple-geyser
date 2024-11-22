@@ -47,12 +47,12 @@ typedef const void* ContactInfoPtr;
 // Function pointer type for each function
 typedef Key (*ContactInfoGetKey)(ContactInfoPtr contact_info_ptr);
 typedef uint64_t (*ContactInfoGetWallclockFn)(ContactInfoPtr contact_info_ptr);
-typedef uint64_t (*ContactInfoGetShredVersion)(ContactInfoPtr contact_info_ptr);
+typedef uint64_t (*ContactInfoGetShredVersionFn)(ContactInfoPtr contact_info_ptr);
 typedef bool (*ContactInfoGetVersionFn)(ContactInfoPtr contact_info_ptr, struct FfiVersion* ffi_version);
 
 typedef bool (*ContactInfoGetGossipFn)(ContactInfoPtr contact_info_ptr, struct FfiSocketAddr* socket);
 typedef bool (*ContactInfoGetRpcFn)(ContactInfoPtr contact_info_ptr, struct FfiSocketAddr* socket);
-typedef bool (*ContactInfoGetRpcPubsubpFn)(ContactInfoPtr contact_info_ptr, struct FfiSocketAddr* socket);
+typedef bool (*ContactInfoGetRpcPubsubFn)(ContactInfoPtr contact_info_ptr, struct FfiSocketAddr* socket);
 
 typedef bool (*ContactInfoGetServeRepairFn)(ContactInfoPtr contact_info_ptr, FfiProtocol protocol, struct FfiSocketAddr* socket);
 typedef bool (*ContactInfoGetTpuFn)(ContactInfoPtr contact_info_ptr, FfiProtocol protocol, struct FfiSocketAddr* socket);
@@ -60,22 +60,28 @@ typedef bool (*ContactInfoGetTpuForwardsFn)(ContactInfoPtr contact_info_ptr, Ffi
 typedef bool (*ContactInfoGetTpuVoteFn)(ContactInfoPtr contact_info_ptr, FfiProtocol protocol, struct FfiSocketAddr* socket);
 typedef bool (*ContactInfoGetTvuFn)(ContactInfoPtr contact_info_ptr, FfiProtocol protocol, struct FfiSocketAddr* socket);
 
-struct FfiContactInfoInterface {
-    ContactInfoPtr contact_info_ptr;
+typedef struct {
     ContactInfoGetKey get_pubkey_fn;
     ContactInfoGetWallclockFn get_wallclock_fn;
-    ContactInfoGetShredVersion get_shred_version_fn;
+    ContactInfoGetShredVersionFn get_shred_version_fn;
     ContactInfoGetVersionFn get_version_fn;
-    // Socket address getter functions
     ContactInfoGetGossipFn get_gossip_fn;
     ContactInfoGetRpcFn get_rpc_fn;
-    ContactInfoGetRpcPubsubpFn get_rpc_pubsub_fn;
+    ContactInfoGetRpcPubsubFn get_rpc_pubsub_fn;
     ContactInfoGetServeRepairFn get_serve_repair_fn;
     ContactInfoGetTpuFn get_tpu_fn;
     ContactInfoGetTpuForwardsFn get_tpu_forwards_fn;
     ContactInfoGetTpuVoteFn get_tpu_vote_fn;
     ContactInfoGetTvuFn get_tvu_fn;
-};
+    // Add any additional function pointers here
+} FfiContactInfoFunctionTable;
+
+typedef const FfiContactInfoFunctionTable* ContactInfoFunctionTablePtr;
+
+typedef struct {
+    ContactInfoPtr contact_info_ptr;
+    ContactInfoFunctionTablePtr function_table;
+} FfiContactInfoInterface;
 
 // FfiGeyserPlugin struct w/ function pointers
 struct FfiGeyserPlugin {

@@ -32,3 +32,9 @@ reference impls:
 - https://github.com/clockwork-xyz/clockwork/tree/main/plugin
 - https://github.com/solana-labs/solana-accountsdb-plugin-postgres/tree/master 
 - https://github.com/mwrites/solana-geyser-plugin-scaffold
+
+
+compiling c plugin:
+```
+gcc -shared -fPIC -o libsimple_geyser_plugin.so simple_geyser_plugin.c
+```

@@ -136,28 +136,33 @@ void print_contact_info(const struct ContactInfo_C *contact_info_c) {
         fprintf(stderr, "ContactInfo_C is NULL\n");
         return;
     }
-    fprintf(stderr,
-        "greg: plugin: pk: %s, wc: %" PRIu64 ", sv: %" PRIu64 ", gs: %s, rs: %s, rpas: %s, "
-        "srs: %s, tus: %s, tqs: %s, tfus: %s, tfqs: %s, tpu_vote_udp_s: %s, "
-        "tpvqs: %s, tvu_udp_s: %s, tvu_quic_s: %s, version: v%u.%u.%u\n",
-        contact_info_c->base58_pubkey, 
-        contact_info_c->wallclock, 
-        contact_info_c->shred_version, 
-        contact_info_c->gossip_addr ? contact_info_c->gossip_addr : "None",
-        contact_info_c->rpc_addr ? contact_info_c->rpc_addr : "None",
-        contact_info_c->rpc_pubsub_addr ? contact_info_c->rpc_pubsub_addr : "None",
-        contact_info_c->serve_repair_addr ? contact_info_c->serve_repair_addr : "None",
-        contact_info_c->tpu_udp_addr ? contact_info_c->tpu_udp_addr : "None",
-        contact_info_c->tpu_quic_addr ? contact_info_c->tpu_quic_addr : "None",
-        contact_info_c->tpu_forwards_udp_addr ? contact_info_c->tpu_forwards_udp_addr : "None",
-        contact_info_c->tpu_forwards_quic_addr ? contact_info_c->tpu_forwards_quic_addr : "None",
-        contact_info_c->tpu_vote_udp_addr ? contact_info_c->tpu_vote_udp_addr : "None",
-        contact_info_c->tpu_vote_quic_addr ? contact_info_c->tpu_vote_quic_addr : "None",
-        contact_info_c->tvu_udp_addr ? contact_info_c->tvu_udp_addr : "None",
-        contact_info_c->tvu_quic_addr ? contact_info_c->tvu_quic_addr : "None",
-        contact_info_c->version.major, 
-        contact_info_c->version.minor, 
-        contact_info_c->version.patch);
+    int i = contact_info_c->wallclock++;
+    // fprintf(stderr,
+    //     "gregc: plugin: pk: %s, wc: %" PRIu64 "\n",
+    //     contact_info_c->base58_pubkey, 
+    //     contact_info_c->wallclock);
+    // fprintf(stderr,
+    //     "gregc: plugin: pk: %s, wc: %" PRIu64 ", sv: %" PRIu64 ", gs: %s, rs: %s, rpas: %s, "
+    //     "srs: %s, tus: %s, tqs: %s, tfus: %s, tfqs: %s, tpu_vote_udp_s: %s, "
+    //     "tpvqs: %s, tvu_udp_s: %s, tvu_quic_s: %s, version: v%u.%u.%u\n",
+    //     contact_info_c->base58_pubkey, 
+    //     contact_info_c->wallclock, 
+    //     contact_info_c->shred_version, 
+    //     contact_info_c->gossip_addr ? contact_info_c->gossip_addr : "None",
+    //     contact_info_c->rpc_addr ? contact_info_c->rpc_addr : "None",
+    //     contact_info_c->rpc_pubsub_addr ? contact_info_c->rpc_pubsub_addr : "None",
+    //     contact_info_c->serve_repair_addr ? contact_info_c->serve_repair_addr : "None",
+    //     contact_info_c->tpu_udp_addr ? contact_info_c->tpu_udp_addr : "None",
+    //     contact_info_c->tpu_quic_addr ? contact_info_c->tpu_quic_addr : "None",
+    //     contact_info_c->tpu_forwards_udp_addr ? contact_info_c->tpu_forwards_udp_addr : "None",
+    //     contact_info_c->tpu_forwards_quic_addr ? contact_info_c->tpu_forwards_quic_addr : "None",
+    //     contact_info_c->tpu_vote_udp_addr ? contact_info_c->tpu_vote_udp_addr : "None",
+    //     contact_info_c->tpu_vote_quic_addr ? contact_info_c->tpu_vote_quic_addr : "None",
+    //     contact_info_c->tvu_udp_addr ? contact_info_c->tvu_udp_addr : "None",
+    //     contact_info_c->tvu_quic_addr ? contact_info_c->tvu_quic_addr : "None",
+    //     contact_info_c->version.major, 
+    //     contact_info_c->version.minor, 
+    //     contact_info_c->version.patch);
     fflush(stderr); 
 }
 

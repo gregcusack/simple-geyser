@@ -37,6 +37,7 @@ typedef int32_t (*OnLoadFn)(const char* config_file, int is_reload);
 typedef void (*OnUnloadFn)(void);
 typedef int32_t (*NodeUpdateNotificationsEnabledFn)(void);
 typedef int32_t (*NotifyNodeUpdateFn)(const void* interface);
+typedef int32_t (*NotifyNodesUpdateNewFn)(const void* contact_info_bytes);
 
 // Pubkey
 typedef const uint8_t* Key;
@@ -90,6 +91,7 @@ struct FfiGeyserPlugin {
     OnUnloadFn on_unload;
     NodeUpdateNotificationsEnabledFn node_update_notifications_enabled;
     NotifyNodeUpdateFn notify_node_update;
+    NotifyNodesUpdateNewFn notify_nodes_update_new;
 };
 
 // User must free the returned memory
@@ -111,3 +113,9 @@ char* format_socket_addr(const struct FfiSocketAddr *addr) {
 
     return result; // Caller must free
 }
+
+typedef struct {
+    const uint8_t* data_ptr;
+    size_t data_len;
+} FfiContactInfoBytes;
+

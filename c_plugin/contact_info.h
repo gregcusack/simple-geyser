@@ -28,6 +28,40 @@ struct ContactInfo_C {
     char *tvu_quic_addr;
 };
 
+typedef struct {
+    char base58_pubkey[BASE58_ENCODED_LENGTH];
+    uint64_t wallclock;
+} ContactInfo_new_C;
+
+void print_contact_info_new(const ContactInfo_new_C *contact_info_c);
+
+int get_contact_info_new(const FfiContactInfoBytes* contact_info_bytes) {
+    if (!contact_info_bytes || !contact_info_bytes->data_ptr || contact_info_bytes->data_len == 0) {
+        fprintf(stderr, "gregp: Invalid contact info bytes\n");
+        return -1;
+    }
+    
+    size_t entry_size = sizeof(ContactInfo_new_C);
+    if (contact_info_bytes->data_len % entry_size != 0) {
+        fprintf(stderr, "gregp: Data length is not aligned with ContactInfo_C size\n");
+        return -1;
+    }
+
+    size_t num_entries = contact_info_bytes->data_len / entry_size;
+    fprintf(stderr, "gregp: Processing %zu ContactInfo_C entries:\n", num_entries);
+
+    const ContactInfo_new_C* entries = (const ContactInfo_new_C*)contact_info_bytes->data_ptr;
+
+    for (size_t i = 0; i < num_entries; ++i) {
+        fprintf(stderr, "gregp: Entry %zu:\n", i + 1);
+        print_contact_info_new(&entries[i]);
+    }
+
+    // struct ContactInfo_C* contact_info_c = (struct ContactInfo_C*)malloc(sizeof(struct ContactInfo_C));
+
+    return 0;
+}
+
 struct ContactInfo_C* get_contact_info(const FfiContactInfoInterface* interface) {
     if (!interface || !interface->contact_info_ptr || !interface->function_table) {
         fprintf(stderr, "Invalid interface or function table\n");
@@ -136,11 +170,11 @@ void print_contact_info(const struct ContactInfo_C *contact_info_c) {
         fprintf(stderr, "ContactInfo_C is NULL\n");
         return;
     }
-    int i = contact_info_c->wallclock++;
-    // fprintf(stderr,
-    //     "gregc: plugin: pk: %s, wc: %" PRIu64 "\n",
-    //     contact_info_c->base58_pubkey, 
-    //     contact_info_c->wallclock);
+    // int i = contact_info_c->wallclock++;
+    fprintf(stderr,
+        "gregp: plugin: pk: %s, wc: %" PRIu64 "\n",
+        contact_info_c->base58_pubkey, 
+        contact_info_c->wallclock);
     // fprintf(stderr,
     //     "gregc: plugin: pk: %s, wc: %" PRIu64 ", sv: %" PRIu64 ", gs: %s, rs: %s, rpas: %s, "
     //     "srs: %s, tus: %s, tqs: %s, tfus: %s, tfqs: %s, tpu_vote_udp_s: %s, "
@@ -163,6 +197,21 @@ void print_contact_info(const struct ContactInfo_C *contact_info_c) {
     //     contact_info_c->version.major, 
     //     contact_info_c->version.minor, 
     //     contact_info_c->version.patch);
+    fflush(stderr); 
+}
+
+void print_contact_info_new(const ContactInfo_new_C *contact_info_c) {
+    if (!contact_info_c) {
+        fprintf(stderr, "ContactInfo_new_C is NULL\n");
+        return;
+    }
+    // fprintf(stderr,
+    //     "gregc: plugin: pk: %s, wc: %" PRIu64 "\n",
+    //     contact_info_c->base58_pubkey, 
+    //     contact_info_c->wallclock);
+    fprintf(stderr,
+        "gregc: wc: %" PRIu64 "\n",
+        contact_info_c->wallclock);
     fflush(stderr); 
 }
 

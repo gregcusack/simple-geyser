@@ -7,9 +7,11 @@ use {
         ffi_socket_addr_to_socket_addr, 
         FfiContactInfoInterface,
         FfiProtocol,
-    }, 
+        FfiContactInfoBytes,
+    },
     solana_program::slot_history::Slot, 
     solana_sdk::pubkey::Pubkey,
+    std::time::Instant,
 };
 
 pub const RUST_LOG_FILTER: &str = "info";
@@ -107,6 +109,20 @@ impl GeyserPlugin for SimplePlugin {
 
         info!("greg: pk: {}, wc: {}, sv: {}, gs: {:?}, rs: {:?}, tsq: {:?}, tsu: {:?}", pk, wallclock, shred_version, gossip, rpc, tpu_quic, tpu_udp);
 
+        Ok(())
+    }
+
+    /// Called periodically to send entire set of contact info
+    /// contact info is serialized
+    #[allow(unused_variables)]
+    fn notify_nodes_update_new(&self, contact_info_bytes: &FfiContactInfoBytes) -> PluginResult<()> {
+        let now = Instant::now();
+        let contact_info = contact_info_bytes.deserialize();
+        let elapsed = now.elapsed();
+        info!("greg: elapsed: {elapsed:?}");
+        for ci in contact_info.iter() {
+            info!("greg: pk: {}", ci.pubkey());
+        }
         Ok(())
     }
 

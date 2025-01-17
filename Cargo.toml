@@ -7,6 +7,7 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+bincode = "1.3.3"
 log = "0.4.22"
 agave-geyser-plugin-interface = { path = "/home/sol/solana/geyser-plugin-interface" }
 solana-program = { path = "/home/sol/solana/sdk/program" }

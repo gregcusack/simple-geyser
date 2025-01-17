@@ -42,6 +42,18 @@ int notify_node_update(const void* interface) {
     return 0; 
 }
 
+int notify_nodes_update_new(const void* contact_info_bytes) {
+    fprintf(stderr, "gregp: in nodify_nodes_update_new\n");
+    fflush(stderr);
+    const FfiContactInfoBytes *info = (const FfiContactInfoBytes*)contact_info_bytes;
+    fprintf(stderr, "gregp: post cast\n");
+    fflush(stderr);
+    get_contact_info_new(info);
+
+    return 0; 
+}
+
+
 // Implement _create_geyser_plugin_c function
 __attribute__((visibility("default"))) struct FfiGeyserPlugin* _create_geyser_plugin_c(void) {
     struct FfiGeyserPlugin* plugin = (struct FfiGeyserPlugin*)malloc(sizeof(struct FfiGeyserPlugin));
@@ -50,5 +62,6 @@ __attribute__((visibility("default"))) struct FfiGeyserPlugin* _create_geyser_pl
     plugin->on_unload = on_unload;
     plugin->node_update_notifications_enabled = node_update_notifications_enabled;
     plugin->notify_node_update = notify_node_update;
+    plugin->notify_nodes_update_new = notify_nodes_update_new;
     return plugin;
 }
